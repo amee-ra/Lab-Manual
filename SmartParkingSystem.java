@@ -1,0 +1,148 @@
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+
+public class SmartParkingSystem extends Frame implements ActionListener {
+
+    Label titleLabel;
+    Label totalLabel, availableLabel, occupiedLabel, statusLabel;
+
+    TextField vehicleField;
+
+    Button entryButton;
+    Button exitButton;
+    Button predictButton;
+    Button reportButton;
+
+    TextArea reportArea;
+    java.util.List<String> parkedVehicles;
+
+    int totalSlots = 20;
+    int occupiedSlots = 0;
+    int availableSlots = totalSlots;
+
+    public SmartParkingSystem() {
+
+        setTitle("Smart Parking Availability Predictor");
+        setSize(700, 550);
+        setLayout(new FlowLayout());
+
+        titleLabel = new Label("SMART PARKING AVAILABILITY PREDICTOR");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+
+        totalLabel = new Label("Total Slots : " + totalSlots);
+        availableLabel = new Label("Available Slots : " + availableSlots);
+        occupiedLabel = new Label("Occupied Slots : " + occupiedSlots);
+
+        statusLabel = new Label("Vehicle Number");
+
+        vehicleField = new TextField(20);
+
+        entryButton = new Button("Vehicle Entry");
+        exitButton = new Button("Vehicle Exit");
+        predictButton = new Button("Predict Parking");
+        reportButton = new Button("View Report");
+
+        reportArea = new TextArea(15, 60);
+        reportArea.setEditable(false);
+
+        parkedVehicles = new ArrayList<>();
+
+        entryButton.addActionListener(this);
+        exitButton.addActionListener(this);
+        predictButton.addActionListener(this);
+        reportButton.addActionListener(this);
+
+        add(titleLabel);
+
+        add(totalLabel);
+        add(availableLabel);
+        add(occupiedLabel);
+
+        add(statusLabel);
+        add(vehicleField);
+
+        add(entryButton);
+        add(exitButton);
+        add(predictButton);
+        add(reportButton);
+
+        add(reportArea);
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                dispose();
+            }
+        });
+
+        setVisible(true);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+
+        if (e.getSource() == entryButton) {
+            String number = vehicleField.getText().trim();
+            if (number.isEmpty()) {
+                reportArea.append("Please enter a vehicle number.\n");
+            } else if (availableSlots > 0) {
+                if (parkedVehicles.contains(number)) {
+                    reportArea.append("Vehicle already parked: " + number + "\n");
+                } else {
+                    occupiedSlots++;
+                    availableSlots--;
+                    parkedVehicles.add(number);
+                    reportArea.append("Vehicle Entered: " + number + "\n");
+                }
+            } else {
+                reportArea.append("Parking Full!\n");
+            }
+        }
+
+        if (e.getSource() == exitButton) {
+            String number = vehicleField.getText().trim();
+            if (number.isEmpty()) {
+                reportArea.append("Please enter a vehicle number to exit.\n");
+            } else if (parkedVehicles.contains(number)) {
+                parkedVehicles.remove(number);
+                occupiedSlots--;
+                availableSlots++;
+                reportArea.append("Vehicle Exited: " + number + "\n");
+            } else {
+                reportArea.append("Vehicle not found or not parked: " + number + "\n");
+            }
+        }
+
+        if (e.getSource() == predictButton) {
+            if (availableSlots >= 10) {
+                reportArea.append("\nPrediction : Plenty of Parking Available\n");
+            } else if (availableSlots >= 5) {
+                reportArea.append("\nPrediction : Moderate Parking Available\n");
+            } else {
+                reportArea.append("\nPrediction : Parking Will Become Full Soon\n");
+            }
+        }
+
+        if (e.getSource() == reportButton) {
+            reportArea.append("\n------ Parking Report ------\n");
+            reportArea.append("Total Slots : " + totalSlots + "\n");
+            reportArea.append("Occupied Slots : " + occupiedSlots + "\n");
+            reportArea.append("Available Slots : " + availableSlots + "\n");
+            reportArea.append("Occupied Vehicles: ");
+            if (parkedVehicles.isEmpty()) {
+                reportArea.append("None\n");
+            } else {
+                reportArea.append(String.join(", ", parkedVehicles) + "\n");
+            }
+        }
+
+        totalLabel.setText("Total Slots : " + totalSlots);
+        occupiedLabel.setText("Occupied Slots : " + occupiedSlots);
+        availableLabel.setText("Available Slots : " + availableSlots);
+
+        vehicleField.setText("");
+    }
+
+    public static void main(String[] args) {
+        new SmartParkingSystem();
+    }
+}
